@@ -1,0 +1,26 @@
+// config/diamonds.js
+module.exports = [
+  { amount: 24, price: 6000 },
+  { amount: 44, price: 9000 },
+  { amount: 88, price: 16000 },
+  { amount: 133, price: 25000 },
+  { amount: 177, price: 31000 },
+  { amount: 221, price: 43000 },
+  { amount: 309, price: 58000 },
+  { amount: 354, price: 65000 },
+  { amount: 494, price: 88000 },
+  { amount: 715, price: 120000 },
+  { amount: 1041, price: 180000 },
+  { amount: 1262, price: 215000 },
+  { amount: 1535, price: 260000 },
+  { amount: 1923, price: 325000 },
+  { amount: 2645, price: 430000 },
+  { amount: 2778, price: 450000 },
+  { amount: 3139, price: 510000 },
+  { amount: 3686, price: 580000 },
+  { amount: 5290, price: 845000 },
+  { amount: 6146, price: 980000 },
+  { amount: 6640, price: 1060000 },
+  { amount: 8791, price: 1395000 },
+  { amount: 12292, price: 2050000 }
+];
