@@ -22,5 +22,7 @@ module.exports = [
   { amount: 6146, price: 980000 },
   { amount: 6640, price: 1060000 },
   { amount: 8791, price: 1395000 },
-  { amount: 12292, price: 2050000 }
+  { amount: 12292, price: 2050000 },
+    // 🆕 Haftalik Propack
+  { type: "weekly_pack", title: "🗓 Haftalik Propusk", price: 20000 }
 ];

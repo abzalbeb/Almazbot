@@ -20,33 +20,50 @@ function registerMenuActions(bot) {
 
   // 💎 Almaz tanlash
   bot.action('menu_diamonds', async (ctx) => {
-    ctx.answerCbQuery();
+  ctx.answerCbQuery();
 
-    try {
-      if (!diamonds || diamonds.length === 0) {
-        return ctx.reply('Hozircha almaz paketlari mavjud emas.');
-      }
+  try {
+    if (!diamonds || diamonds.length === 0) {
+      return ctx.reply('Hozircha almaz paketlari mavjud emas.');
+    }
 
-      const buttons = diamonds.map((item, index) => {
+    // Haftalik propuskni ajratib olish
+    const weeklyPack = diamonds.find(d => d.type === 'weekly_pack');
+
+    // Oddiy diamondlarni filterlash (amount mavjud bo‘lganlar)
+    const diamondButtons = diamonds
+      .filter(d => d.amount) // faqat oddiy almazlar
+      .map((item, index) => {
         const formattedPrice = item.price.toLocaleString('uz-UZ');
         return Markup.button.callback(`💎 ${item.amount} ta - ${formattedPrice} so'm`, `order_${index}`);
       });
 
-      const chunked = [];
-      for (let i = 0; i < buttons.length; i += 2) {
-        chunked.push(buttons.slice(i, i + 2));
-      }
-      chunked.push([Markup.button.callback('⬅️ Orqaga', 'back_to_menu')]);
-
-      await Promise.all([
-        ctx.deleteMessage().catch(() => {}),
-        ctx.reply('💎 Quyidagi almaz to‘plamlaridan birini tanlang:', Markup.inlineKeyboard(chunked))
-      ]);
-    } catch (e) {
-      console.error('menu_diamonds xatolik:', e);
-      ctx.reply('❌ Xatolik yuz berdi.');
+    // 2 tadan joylashtirish
+    const chunked = [];
+    for (let i = 0; i < diamondButtons.length; i += 2) {
+      chunked.push(diamondButtons.slice(i, i + 2));
     }
-  });
+
+    // Agar haftalik propusk bo‘lsa, uni alohida joylashtiramiz
+    if (weeklyPack) {
+      const formattedWeeklyPrice = weeklyPack.price.toLocaleString('uz-UZ');
+      chunked.push([
+        Markup.button.callback(`${weeklyPack.title} - ${formattedWeeklyPrice} so'm`, 'order_weekly_pack')
+      ]);
+    }
+
+    // Orqaga tugmasi
+    chunked.push([Markup.button.callback('⬅️ Orqaga', 'back_to_menu')]);
+
+    await Promise.all([
+      ctx.deleteMessage().catch(() => {}),
+      ctx.reply('💎 Quyidagi almaz to‘plamlaridan birini tanlang:', Markup.inlineKeyboard(chunked))
+    ]);
+  } catch (e) {
+    console.error('menu_diamonds xatolik:', e);
+    ctx.reply('❌ Xatolik yuz berdi.');
+  }
+});
 
   // 🛠 Texnik yordam
   bot.action('menu_support', async (ctx) => {

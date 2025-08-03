@@ -30,6 +30,30 @@ module.exports = function registerOrderActions(bot) {
     }
   });
 
+  bot.action('order_weekly_pack', async (ctx) => {
+  try {
+    await ctx.answerCbQuery();
+    
+    const weeklyPack = diamonds.find(d => d.type === 'weekly_pack');
+
+    if (!weeklyPack) {
+      return ctx.reply('❌ Haftalik propusk hozircha mavjud emas.');
+    }
+
+    ctx.session = ctx.session || {};
+    ctx.session.tempOrder = { ...weeklyPack };
+    ctx.session.step = 'awaiting_full_id';
+
+    await ctx.reply(
+      `Iltimos, *Game ID* va *Zone ID* ni quyidagi formatda kiriting:\n\n📌 \`123456789 (1234)\`\n\n⚠️ *Server ID’sini unutmang!*`,
+      { parse_mode: 'Markdown' }
+    );
+  } catch (err) {
+    console.error('❌ order_weekly_pack actionda xatolik:', err);
+    ctx.reply('❌ Buyurtma bosqichida xatolik yuz berdi.');
+  }
+});
+
 
   // 2. Game ID + Zone ID kiritish va Codashop orqali nickname olish
   bot.on('text', async (ctx) => {
@@ -85,25 +109,34 @@ module.exports = function registerOrderActions(bot) {
           return ctx.reply('❌ O‘yinchi topilmadi. Iltimos, Game ID va Zone ID ni tekshirib, qayta yuboring.');
         }
 
-        // ✅ Nickname chiqdi
+        
         ctx.session.tempOrder.gameId = gameId;
         ctx.session.tempOrder.zoneId = zoneId;
         ctx.session.tempOrder.nickname = nickname;
-        
         ctx.session.step = 'awaiting_confirmation';
 
+        // 🔧 Order tafsilotlarini ajratib ko'rsatamiz
+        let orderDetails = `🔍 Topilgan nickname: *${nickname}*\n\nBu sizmisiz?\n\n📦 *Buyurtma tafsilotlari:*\n`;
+
+        if (ctx.session.tempOrder.type === 'weekly_pack') {
+          orderDetails += `- 🗓 Paket: Haftalik propusk\n`;
+        } else {
+          orderDetails += `- 💎 Almaz: ${ctx.session.tempOrder.amount} ta\n`;
+        }
+
+        orderDetails += `- 🎮 Game ID: \`${gameId}\`\n- 🌐 Zone ID: \`${zoneId}\``;
+
+        return ctx.reply(orderDetails, {
+          parse_mode: 'Markdown',
+          ...Markup.inlineKeyboard([
+            [Markup.button.callback('✅ Ha, tasdiqlayman', 'confirm_order')],
+            [Markup.button.callback('✏️ Ma\'lumotlarni o‘zgartirish', 'edit_order')]
+          ])
+        });
 
 
-        return ctx.reply(
-          `🔍 Topilgan nickname: *${nickname}*\n\nBu sizmisiz?\n\n📦 *Buyurtma tafsilotlari:*\n- 💎 Almaz: ${ctx.session.tempOrder.amount} ta\n- 🎮 Game ID: \`${gameId}\`\n- 🌐 Zone ID: \`${zoneId}\``,
-          {
-            parse_mode: 'Markdown',
-            ...Markup.inlineKeyboard([
-              [Markup.button.callback('✅ Ha, tasdiqlayman', 'confirm_order')],
-              [Markup.button.callback('✏️ Ma\'lumotlarni o‘zgartirish', 'edit_order')]
-            ])
-          }
-        );
+
+        
       } catch (error) {
         console.error('❌ Codashop nickname olishda xatolik:', error.response?.data || error.message);
         return ctx.reply('❌ Server bilan bog‘lanishda xatolik yuz berdi. Keyinroq urinib ko‘ring.');
@@ -135,18 +168,27 @@ module.exports = function registerOrderActions(bot) {
     ctx.session.tempOrder = null;
     ctx.session.step = null;
 
-    const { amount, gameId, zoneId, nickname } = ctx.session.order;
+    const { amount, gameId, zoneId, nickname, type } = ctx.session.order;
 
-    await ctx.reply(
-      `📥 Buyurtmangiz tasdiqlandi:\n\n- 💎 Almaz: ${amount} ta\n- 🎮 Game ID: \`${gameId}\`\n- 🌐 Zone ID: \`${zoneId}\`\n- 👤 Nickname: *${nickname}*\n\n⏳ Iltimos, to‘lov usulini tanlang.`,
-      {
-        parse_mode: 'Markdown',
-        ...Markup.inlineKeyboard([
-          [Markup.button.callback('💳 Karta orqali to‘lov', 'pay_by_card')]
-        ])
-      }
-    );
+    // 🧾 Buyurtma tafsilotlari
+    let orderText = `📥 Buyurtmangiz tasdiqlandi:\n\n`;
+
+    if (type === 'weekly_pack') {
+      orderText += `- 🗓 Paket: Haftalik propusk\n`;
+    } else {
+      orderText += `- 💎 Almaz: ${amount} ta\n`;
+    }
+
+    orderText += `- 🎮 Game ID: \`${gameId}\`\n- 🌐 Zone ID: \`${zoneId}\`\n- 👤 Nickname: *${nickname}*`;
+
+    await ctx.reply(orderText, {
+      parse_mode: 'Markdown',
+      ...Markup.inlineKeyboard([
+        [Markup.button.callback('💳 Karta orqali to‘lov', 'pay_by_card')]
+      ])
+    });
   });
+
 
 
   // 4. Karta orqali to‘lov → kompaniya kartasi + "Men to‘lovni amalga oshirdim" tugmasi
@@ -216,31 +258,45 @@ module.exports = function registerOrderActions(bot) {
     
 
     // Buyurtma ma’lumotlarini olish
-    const { amount, gameId, zoneId, nickname} = ctx.session.order;
-    const firstName = ctx.from.first_name || 'Безымянный';
-    const username = ctx.from.username ? `@${ctx.from.username}` : 'Username нет';
-    const userId = ctx.from.id;
 
 
-    // Admin kanaliga yuborish
-        await bot.telegram.sendPhoto(process.env.ADMIN_CHANNEL_ID, fileId, {
-          caption:
-            `🆕 *Новый заказ:*\n` +
-            `- 💎 Алмазы: ${amount} шт.\n` +
-            `- 🎮 Game ID: \`${gameId}\`\n` +
-            `- 🌐 Zone ID: \`${zoneId}\`\n` +
-            `- 🔰 MLBB nickname: \`${nickname}\`\n` +
-            `- 👤 ТГ Имя: ${firstName}\n` +
-            `- 🆔 ТГ Username: ${username}\n` +
-            `- 🧾 Telegram ID: \`${userId}\``,
-          parse_mode: 'Markdown',
-          ...Markup.inlineKeyboard([
-            [
-              Markup.button.callback('✅ Подтвердить', `approve_${userId}`),
-              Markup.button.callback('❌ Отклонить', `reject_${userId}`)
-            ]
-          ])
-        });
+
+// Buyurtma ma’lumotlarini olish
+const { amount, gameId, zoneId, nickname, type } = ctx.session.order;
+const firstName = ctx.from.first_name || 'Безымянный';
+const username = ctx.from.username ? `@${ctx.from.username}` : 'Username нет';
+const userId = ctx.from.id;
+
+// 🧾 Adminga yuboriladigan caption matnini yigish
+let caption =
+  `🆕 *Новый заказ:*\n`;
+
+if (type === 'weekly_pack') {
+  caption += `- 🗓 Пакет: Weekly Pass\n`;
+} else {
+  caption += `- 💎 Алмазы: ${amount} шт.\n`;
+}
+
+caption +=
+  `- 🎮 Game ID: \`${gameId}\`\n` +
+  `- 🌐 Zone ID: \`${zoneId}\`\n` +
+  `- 🔰 MLBB nickname: \`${nickname}\`\n` +
+  `- 👤 ТГ Имя: ${firstName}\n` +
+  `- 🆔 ТГ Username: ${username}\n` +
+  `- 🧾 Telegram ID: \`${userId}\``;
+
+// ✅ Admin kanaliga yuborish
+await bot.telegram.sendPhoto(process.env.ADMIN_CHANNEL_ID, fileId, {
+  caption,
+  parse_mode: 'Markdown',
+  ...Markup.inlineKeyboard([
+    [
+      Markup.button.callback('✅ Подтвердить', `approve_${userId}`),
+      Markup.button.callback('❌ Отклонить', `reject_${userId}`)
+    ]
+  ])
+});
+
 
 
     // ❌ Sessionni butunlay o‘chirib tashlaymiz
@@ -266,7 +322,7 @@ module.exports = function registerOrderActions(bot) {
       // Foydalanuvchiga xabar
       await bot.telegram.sendMessage(
         userId,
-        '✅ Buyurtmangiz tasdiqlandi!\n\n⏳ Almaz 1 daqiqadan 10 daqiqagacha hisobingizga tushadi. Tushganidan so‘ng bot orqali sizga xabar yuboriladi.'
+        '✅ Buyurtmangiz tasdiqlandi!\n\n⏳ 1 daqiqadan 10 daqiqagacha hisobingizga tushadi. Tushganidan so‘ng bot orqali sizga xabar yuboriladi.'
       );
 
 
@@ -340,7 +396,7 @@ module.exports = function registerOrderActions(bot) {
       // Foydalanuvchiga xabar
       await bot.telegram.sendMessage(
         userId,
-        '✅ Buyurtmangiz muvaffaqiyatli bajarildi!\n\n💎 Almazlar hisobingizga tushirildi.\n\nAgar xizmatimizdan mamnun bo‘lsangiz — iltimos, rasmiy kanalimizda fikr qoldiring. Bu bizga yanada yaxshiroq xizmat ko‘rsatishda yordam beradi!\n\n👇 Fikr bildirish uchun quyidagi tugmani bosing.',
+        '✅ Buyurtmangiz muvaffaqiyatli bajarildi!\n\n Siz tanlagan paket hisobingizga tushirildi.\n\nAgar xizmatimizdan mamnun bo‘lsangiz — iltimos, rasmiy kanalimizda fikr qoldiring. Bu bizga yanada yaxshiroq xizmat ko‘rsatishda yordam beradi!\n\n👇 Fikr bildirish uchun quyidagi tugmani bosing.',
           Markup.inlineKeyboard([
             Markup.button.url('📝 Fikr qoldirish', 'https://t.me/MLStoreOfficial_chat/6')
           ])
