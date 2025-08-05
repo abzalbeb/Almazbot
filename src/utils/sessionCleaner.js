@@ -1,7 +1,6 @@
+const sessionTimers = {};
 
-const sessionTimers = {}; // Foydalanuvchi taymerlari ro'yxati
-
-function resetSessionTimer(ctx, timeout = 10 * 60 * 1000) {
+function resetSessionTimer(ctx, timeout = 20 * 60 * 1000) {
   const userId = ctx.from.id;
 
   // Eski taymerni tozalash
@@ -9,17 +8,19 @@ function resetSessionTimer(ctx, timeout = 10 * 60 * 1000) {
     clearTimeout(sessionTimers[userId]);
   }
 
-  // Yangi taymer o‘rnatish
+  // Yangi taymer
   sessionTimers[userId] = setTimeout(async () => {
     console.log(`⏰ Session cleared for user ${userId}`);
 
     try {
-      ctx.session = null;
+      // Sessionni xavfsiz tozalash
+      if (ctx.session) {
+        ctx.session = {}; // <-- xavfsiz yechim
+      }
     } catch (e) {
       console.error(`❌ Session clear error for ${userId}:`, e.message);
     }
 
-    // Foydalanuvchiga sessiya tugaganini aytish (xohlasangiz)
     try {
       await ctx.telegram.sendMessage(
         userId,
@@ -29,7 +30,7 @@ function resetSessionTimer(ctx, timeout = 10 * 60 * 1000) {
       console.error(`❌ Can't send timeout message to ${userId}:`, e.message);
     }
 
-    delete sessionTimers[userId]; // Taymerni ro'yxatdan olib tashlash
+    delete sessionTimers[userId];
   }, timeout);
 }
 

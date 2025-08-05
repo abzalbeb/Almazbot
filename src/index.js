@@ -12,15 +12,6 @@ const bot = new Telegraf(BOT_TOKEN);
 // ✅ Session middleware NI ULASH
 bot.use(session());
 
-// Har bir foydalanuvchi interactionida taymerni reset qilish
-bot.use((ctx, next) => {
-  if (ctx.from && ctx.session) {
-    console.log('Session:', ctx.session);
-    resetSessionTimer(ctx);
-  }
-  return next();
-});
-
 
 bot.telegram.setMyCommands([
   { command: 'start', description: 'Asosiy menyu' },
@@ -30,8 +21,54 @@ bot.command('menu', (ctx) => {
   ctx.reply('Asosiy menyu');
 })
 
+// ✅ Til tanlash action-lari
+bot.action('lang_uz', async (ctx) => {
+  if (!ctx.session) ctx.session = {};
+  ctx.session.language = 'uz';
+  await ctx.answerCbQuery();
+
+  // ❌ Til tanlash xabarini o‘chirish
+  try {
+    await ctx.deleteMessage();
+  } catch (err) {
+    console.error('Xabarni o‘chirishda xatolik:', err);
+  }
+
+  // await ctx.reply('✅ Til tanlandi: O‘zbek tili');
+  startHandler(ctx);
+});
+
+bot.action('lang_ru', async (ctx) => {
+  if (!ctx.session) ctx.session = {};
+  ctx.session.language = 'ru';
+  await ctx.answerCbQuery();
+
+  // ❌ Til tanlash xabarini o‘chirish
+  try {
+    await ctx.deleteMessage();
+  } catch (err) {
+    console.error('Xabarni o‘chirishda xatolik:', err);
+  }
+
+  // await ctx.reply('✅ Язык выбран: Русский язык');
+  startHandler(ctx);
+});
+
+  // Har bir foydalanuvchi interactionida taymerni reset qilish
+  bot.use((ctx, next) => {
+    if (ctx.from && ctx.session) {
+      console.log('Session:', ctx.session);
+      resetSessionTimer(ctx);
+    }
+    return next();
+  });
+
+
 // Start buyrug'i
 bot.start((ctx) => startHandler(ctx));
+
+
+
 
 // MENU CALLBACK ACTION-larni ro‘yxatdan o‘tkazamiz
 registerMenuActions(bot);
@@ -55,3 +92,4 @@ bot.catch((err, ctx) => {
 bot.launch().then(() => {
   console.log('🚀 Bot ishga tushdi');
 });
+
