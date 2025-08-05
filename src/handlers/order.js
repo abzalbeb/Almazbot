@@ -461,7 +461,7 @@ module.exports = function registerOrderActions(bot) {
       console.log('Til captiondan olindi:', language);
 
       const approvedMessages = {
-        uz: '✅ Buyurtmangiz tasdiqlandi!\n\n⏳ 1 daqiqadan 10 daqiqagacha hisobingizga tushadi. Tushganidan so‘ng bot orqali sizga xabar yuboriladi.',
+        uz: '✅ Buyurtmangiz tasdiqlandi!\n\n⏳ 1 daqiqadan 15 daqiqagacha hisobingizga tushadi. Tushganidan so‘ng bot orqali sizga xabar yuboriladi.',
         ru: '✅ Ваш заказ подтвержден!\n\n⏳ Алмазы поступят на ваш аккаунт в течение 1–10 минут. После зачисления вы получите уведомление от бота.'
       };
 

@@ -1,6 +1,6 @@
 const sessionTimers = {};
 
-function resetSessionTimer(ctx, timeout = 20 * 60 * 1000) {
+function resetSessionTimer(ctx, timeout = 25 * 60 * 1000) {
   const userId = ctx.from.id;
 
   // Eski taymerni tozalash
