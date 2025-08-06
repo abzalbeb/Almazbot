@@ -283,25 +283,25 @@ module.exports = function registerOrderActions(bot) {
       uz: {
         info: `💳 *Bizning karta ma'lumotlari:*
 
-  1. *Humo*  
-    └ 💳 Karta raqami: \`9860 1701 0166 6684\`  
-    └ 👤 Egasi: *Baxodirov Asad*
+  1. *UzCard*  
+    └ 💳 Karta raqami: \`5614 6819 0619 9025\`  
+    └ 👤 Egasi: *Baxodirov Abzalbek*
 
-  2. *Uzum Visa*  
-    └ 💳 Karta raqami: \`\`  
-    └ 👤 Egasi: **`,
+  2. *Visa Ipak yo'li bank*  
+    └ 💳 Karta raqami: \`4023 0605 1527 5328\`  
+    └ 👤 Egasi: *Abzalbek Baxodirov*`,
         confirm: '✅ Men to‘lovni amalga oshirdim'
       },
       ru: {
         info: `💳 *Наши реквизиты для оплаты:*
 
-  1. *Humo*  
-    └ 💳 Номер карты: \`9860 1701 0166 6684\`  
-    └ 👤 Владелец: *Baxodirov Asad*
+  1. *UzCard*  
+    └ 💳 Номер карты: \`5614 6819 0619 9025\`  
+    └ 👤 Владелец: *Baxodirov Abzalbek*
 
-  2. *Uzum Visa*  
-    └ 💳 Номер карты: \`\`  
-    └ 👤 Владелец: **`,
+  2. *Visa Ipak yo'li bank*  
+    └ 💳 Номер карты: \`4023 0605 1527 5328\`  
+    └ 👤 Владелец: *Abzalbek Baxodirov*`,
         confirm: '✅ Я оплатил(а)'
       }
     };
