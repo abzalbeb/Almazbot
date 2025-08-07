@@ -284,24 +284,24 @@ module.exports = function registerOrderActions(bot) {
         info: `💳 *Bizning karta ma'lumotlari:*
 
   1. *UzCard*  
-    └ 💳 Karta raqami: \`5614 6819 0619 9025\`  
-    └ 👤 Egasi: *Baxodirov Abzalbek*
+    └ 💳 Karta raqami: \`5614 6819 0618 7046\`  
+    └ 👤 Egasi: *Baxodirov Islombek*
 
   2. *Visa Ipak yo'li bank*  
-    └ 💳 Karta raqami: \`4023 0605 1527 5328\`  
-    └ 👤 Egasi: *Abzalbek Baxodirov*`,
+    └ 💳 Karta raqami: \`4023 0605 1035 9226\`  
+    └ 👤 Egasi: *Islombek Baxodirov*`,
         confirm: '✅ Men to‘lovni amalga oshirdim'
       },
       ru: {
         info: `💳 *Наши реквизиты для оплаты:*
 
   1. *UzCard*  
-    └ 💳 Номер карты: \`5614 6819 0619 9025\`  
-    └ 👤 Владелец: *Baxodirov Abzalbek*
+    └ 💳 Номер карты: \`5614 6819 0618 7046\`  
+    └ 👤 Владелец: *Baxodirov Islombek*
 
   2. *Visa Ipak yo'li bank*  
-    └ 💳 Номер карты: \`4023 0605 1527 5328\`  
-    └ 👤 Владелец: *Abzalbek Baxodirov*`,
+    └ 💳 Номер карты: \`4023 0605 1035 9226\`  
+    └ 👤 Владелец: *Islombek Baxodirov*`,
         confirm: '✅ Я оплатил(а)'
       }
     };
